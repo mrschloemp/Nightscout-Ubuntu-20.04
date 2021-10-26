@@ -1,38 +1,38 @@
 Nightscout auf Ubuntu 20.04 installieren
 
 Installation auf einem VPS R6 von 1blu.de. 
-Der VPS hat 2 CPU Cores, 6 GB Ram und 80GB SSD u.v.m…, ausreichend für Nightsout.
+Der VPS hat 2 CPU Cores, 6 GB Ram und 80GB SSD u.v.mâ€¦, ausreichend fÃ¼r Nightsout.
 https://www.1blu.de/vps-aktion/
 
-Eine zusätzliche Domain ist nicht zwangsläufig notwendig, kann man aber günstig dazu buchen. Eine Subdomain von 1blu ist beim Server enthalten. Let´s Encrypt funktioniert mit der Subdomain ohne Probleme (Die IP Adresse des Servers kann nicht mit Let´s Encrypt abgesichert werden!).
+Eine zusÃ¤tzliche Domain ist nicht zwangslÃ¤ufig notwendig, kann man aber gÃ¼nstig dazu buchen. Eine Subdomain von 1blu ist beim Server enthalten. LetÂ´s Encrypt funktioniert mit der Subdomain ohne Probleme (Die IP Adresse des Servers kann nicht mit LetÂ´s Encrypt abgesichert werden!).
 Da ich schon ein Webhosting Paket bei 1blu besitze, habe ich daraus eine Domain auf den Server per DNS Eintrag geleitet.
 
 Einrichtung des Servers.
 Ich setzte Grundkenntnisse Server/SSH/Konsole voraus.
 
 
-Ich habe mich für Ubuntu 20.04 als Distribution entschieden.
-Im Vorfeld habe ich Ubuntu 20.04 über das 1blu Kundeninterface installiert und mir die SSH Zugangsdaten notiert.
+Ich habe mich fÃ¼r Ubuntu 20.04 als Distribution entschieden.
+Im Vorfeld habe ich Ubuntu 20.04 Ã¼ber das 1blu Kundeninterface installiert und mir die SSH Zugangsdaten notiert.
 Als Konsole/SSH Client verwende ich Putty https://www.putty.org/
 
 Beginnen wir mit dem Einrichten.
 
-Putty öffnen, Serverdaten eingeben und via root User einloggen. Beim ersten Login via SSH muss das Passwort geändert werden.
+Putty Ã¶ffnen, Serverdaten eingeben und via root User einloggen. Beim ersten Login via SSH muss das Passwort geÃ¤ndert werden.
 
 Server Updates und diverse notwendige Plugins installieren
 Neuen Benutzer anlegen:
 
-$ adduser mainuser
+  $ adduser mainuser
 
 mainuser Root Berechtigung erteilen:
 
 $ usermod -aG sudo mainuser
 
-Berechtigung prüfen:
+Berechtigung prÃ¼fen:
 
 $ su mainuser
 
-$ grep ‚^sudo‘ /etc/group
+$ grep â€š^sudoâ€˜ /etc/group
 
 Ubuntu aktualisieren:
 
@@ -46,7 +46,7 @@ Firewall UFW installieren:
 
 $ sudo apt install ufw
 
-Um die Konfiguration der Firewall kümmern wir uns zum Schluss.
+Um die Konfiguration der Firewall kÃ¼mmern wir uns zum Schluss.
 
 Nano installieren
 
@@ -71,7 +71,7 @@ $ sudo apt install build-essential checkinstall
 $ sudo apt install libssl-dev
 $ wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.33.8/install.sh | bash
 
-– restart konsole – login mit mainuser –
+â€“ restart konsole â€“ login mit mainuser â€“
 
 $ source /etc/profile
 $ nvm ls-remote
@@ -93,9 +93,9 @@ Mongo DB installieren
 $ sudo apt install mongodb
 $ sudo systemctl status mongodb
 
-MongoDB sollte active sein, Verbindfung prüfen:
+MongoDB sollte active sein, Verbindfung prÃ¼fen:
 
-$ mongo –eval ‚db.runCommand({ connectionStatus: 1 })‘
+$ mongo â€“eval â€šdb.runCommand({ connectionStatus: 1 })â€˜
 
  
 
@@ -103,35 +103,35 @@ Ausgabe:
 
 MongoDB shell version v3.6.8
 connecting to: mongodb://127.0.0.1:27017
-Implicit session: session { „id“ : UUID(„e3c1f2a1-a426-4366-b5f8-c8b8e7813135“) }
+Implicit session: session { â€židâ€œ : UUID(â€že3c1f2a1-a426-4366-b5f8-c8b8e7813135â€œ) }
 MongoDB server version: 3.6.8
 {
-„authInfo“ : {
-„authenticatedUsers“ : [ ],
-„authenticatedUserRoles“ : [ ]
+â€žauthInfoâ€œ : {
+â€žauthenticatedUsersâ€œ : [ ],
+â€žauthenticatedUserRolesâ€œ : [ ]
 },
-„ok“ : 1
+â€žokâ€œ : 1
 }
 
  
 
-Mongo Datenbank erstellen („benutzername“ „passwort“ nach Wunsch ändern und merken/aufschreiben)
+Mongo Datenbank erstellen (â€žbenutzernameâ€œ â€žpasswortâ€œ nach Wunsch Ã¤ndern und merken/aufschreiben)
 
 $ mongo
 > use Nightscout
-> db.createUser({user: „benutzername„, pwd: „passwort„, roles:[„readWrite“]})
+> db.createUser({user: â€žbenutzernameâ€ž, pwd: â€žpasswortâ€ž, roles:[â€žreadWriteâ€œ]})
 > quit()
 
  
 
-Prüfen in welchem Verzeichnis man sich befindet:
+PrÃ¼fen in welchem Verzeichnis man sich befindet:
 
 $ pwd
 > /home/mainuser
 
 Wenn nicht im home/mainuser verzeichnis
 
-§ cd /home/mainuser
+Â§ cd /home/mainuser
 
  
 
@@ -144,27 +144,27 @@ $ npm install
 Nach der Installation
 $ nano start.sh
 
-folgenden Text einfügen und speichern. „benutzer““passwort“ der MongoDatenbank ändern/angeben, API_Secret wunschgemäß Angeben, Base-Url ggf. ändern. Welche Plugins/Module benötigt werden hängt vom Anwender individuell ab.
-Die hier aufgeführten Plugins/Module sind für mich Optimal. Eine Auflistung der möglichen Plugins gibt´s auf github
+folgenden Text einfÃ¼gen und speichern. â€žbenutzerâ€œâ€œpasswortâ€œ der MongoDatenbank Ã¤ndern/angeben, API_Secret wunschgemÃ¤ÃŸ Angeben, Base-Url ggf. Ã¤ndern. Welche Plugins/Module benÃ¶tigt werden hÃ¤ngt vom Anwender individuell ab.
+Die hier aufgefÃ¼hrten Plugins/Module sind fÃ¼r mich Optimal. Eine Auflistung der mÃ¶glichen Plugins gibtÂ´s auf github
 https://github.com/nightscout/cgm-remote-monitor#plugins  :
 
 #!/bin/bash
 
 # environment variables
-export DISPLAY_UNITS=“mg/dl“
-export MONGO_CONNECTION=“mongodb://benutzer:passwort@localhost:27017/Nightscout“
-export BASE_URL=“127.0.0.1:1337"
-export API_SECRET=“1234567890„
-export PUMP_FIELDS=“reservoir battery status“
+export DISPLAY_UNITS=â€œmg/dlâ€œ
+export MONGO_CONNECTION=â€œmongodb://benutzer:passwort@localhost:27017/Nightscoutâ€œ
+export BASE_URL=â€œ127.0.0.1:1337"
+export API_SECRET=â€œ1234567890â€ž
+export PUMP_FIELDS=â€œreservoir battery statusâ€œ
 export DEVICESTATUS_ADVANCED=true
-export ENABLE=“careportal loop iob cob openaps pump bwg rawbg basal cors direction timeago devicestatus ar2 profile boluscalc food sage iage cage alexa basalprofile bgi directions bage upbat googlehome errorcodes reservoir battery openapsbasal“
+export ENABLE=â€œcareportal loop iob cob openaps pump bwg rawbg basal cors direction timeago devicestatus ar2 profile boluscalc food sage iage cage alexa basalprofile bgi directions bage upbat googlehome errorcodes reservoir battery openapsbasalâ€œ
 export TIME_FORMAT=24
 export INSECURE_USE_HTTP=true
 export LANGUAGE=de
 export EDIT_MODE=on
 export PUMP_ENABLE_ALERTS=true
-export PUMP_FIELDS=“reservoir battery clock status“
-export PUMP_RETRO_FIELDS=“reservoir battery clock“
+export PUMP_FIELDS=â€œreservoir battery clock statusâ€œ
+export PUMP_RETRO_FIELDS=â€œreservoir battery clockâ€œ
 export PUMP_WARN_CLOCK=30
 export PUMP_URGENT_CLOCK=60
 export PUMP_WARN_RES=50
@@ -176,13 +176,13 @@ export PUMP_URGENT_BATT_V=1.30
 export OPENAPS_ENABLE_ALERTS=false
 export OPENAPS_WARN=30
 export OPENAPS_URGENT=60
-export OPENAPS_FIELDS=“status-symbol status-label iob meal-assist rssi freq“
-export OPENAPS_RETRO_FIELDS=“status-symbol status-label iob meal-assist rssi“
+export OPENAPS_FIELDS=â€œstatus-symbol status-label iob meal-assist rssi freqâ€œ
+export OPENAPS_RETRO_FIELDS=â€œstatus-symbol status-label iob meal-assist rssiâ€œ
 export LOOP_ENABLE_ALERTS=false
 export LOOP_WARN=30
 export LOOP_URGENT=60
 export SHOW_PLUGINS=careportal
-export SHOW_FORECAST=“ar2 openaps“
+export SHOW_FORECAST=â€œar2 openapsâ€œ
 
 #export SSL_KEY=/etc/letsencrypt/live/domain.de/privkey.pem
 #export SSL_CERT=/etc/letsencrypt/live/domain.de/fullchain.pem
@@ -190,7 +190,7 @@ export SHOW_FORECAST=“ar2 openaps“
 # start server
 /home/mainuser/.nvm/versions/node/v14.18.1/bin/node server.js
 
-Speichern und beenden mit: strg+X – Y – enter
+Speichern und beenden mit: strg+X â€“ Y â€“ enter
 
 $ chmod +100 +010 start.sh
 $ ./start.sh
@@ -200,7 +200,7 @@ Nach Erfolgsmeldung strg+c
 Nightscout Service einrichten
 $ sudo nano /etc/systemd/system/nightscout.service
 
-einfügen und speichern:
+einfÃ¼gen und speichern:
 
 [Unit]
 Description=Nightscout Service
@@ -214,7 +214,7 @@ ExecStart=/home/mainuser/cgm-remote-monitor/start.sh
 [Install]
 WantedBy=multi-user.target
 
-Speichern und beenden mit: „strg+X“ – „Y“ – „enter“
+Speichern und beenden mit: â€žstrg+Xâ€œ â€“ â€žYâ€œ â€“ â€ženterâ€œ
 Reload systemd:
 
 $ sudo systemctl daemon-reload
@@ -230,17 +230,17 @@ $ sudo systemctl status nightscout.service
 
 Ausgabe:
 
-? nightscout.service – Nightscout Service
+? nightscout.service â€“ Nightscout Service
 Loaded: loaded (/etc/systemd/system/nightscout.service; enabled; vendor preset: enabled)
 Active: active (running)
 [..]
 
 Konfiguration VirtualHost
-Standard Konfiguration kopieren (Standard zu deiner Domain). Rot Markierte Elemente auf deine Domain/Bedürnisse ändern.
+Standard Konfiguration kopieren (Standard zu deiner Domain). Rot Markierte Elemente auf deine Domain/BedÃ¼rnisse Ã¤ndern.
 
 $ sudo cp /etc/apache2/sites-available/000-default.conf /etc/apache2/sites-available/Domain.de.conf
 
-Konfiguration abändern auf Deine Domain
+Konfiguration abÃ¤ndern auf Deine Domain
 
 $ sudo nano /etc/apache2/sites-available/Domain.de.conf
 
@@ -248,7 +248,7 @@ $ sudo nano /etc/apache2/sites-available/Domain.de.conf
 # The ServerName directive sets the request scheme, hostname and port that
 # the server uses to identify itself. This is used when creating
 # redirection URLs. In the context of virtual hosts, the ServerName
-# specifies what hostname must appear in the request’s Host: header to
+# specifies what hostname must appear in the requestâ€™s Host: header to
 # match this virtual host. For the default virtual host (this file) this
 # value is not decisive as it is used as a last resort host regardless.
 # However, you must set it for any further virtual host explicitly.
@@ -258,7 +258,7 @@ ServerName Domain.de
 ServerAlias www.Domain.de
 DocumentRoot /var/www/html
 
-# Available loglevels: trace8, …, trace1, debug, info, notice, warn,
+# Available loglevels: trace8, â€¦, trace1, debug, info, notice, warn,
 # error, crit, alert, emerg.
 # It is also possible to configure the loglevel for particular
 # modules, e.g.
@@ -271,11 +271,11 @@ CustomLog ${APACHE_LOG_DIR}/Domain.de.access.log combined
 # enabled or disabled at a global level, it is possible to
 # include a line for only one particular virtual host. For example the
 # following line enables the CGI configuration for this host only
-# after it has been globally disabled with „a2disconf“.
+# after it has been globally disabled with â€ža2disconfâ€œ.
 #Include conf-available/serve-cgi-bin.conf
 </VirtualHost>
 
-Spichern mit „strg+x“ –> „Y“–>“enter“
+Spichern mit â€žstrg+xâ€œ â€“> â€žYâ€œâ€“>â€œenterâ€œ
 
 Standard Konfiguration deaktivieren
 
@@ -293,20 +293,20 @@ Domain dem Host zuweisen
 
 $ sudo nano /etc/hosts
 
-[…]
+[â€¦]
 IP.deines.Servers Domain.de
-[…]
+[â€¦]
 
-Speichern mit „strg+X“ – „Y“ – „enter“
+Speichern mit â€žstrg+Xâ€œ â€“ â€žYâ€œ â€“ â€ženterâ€œ
 
-Let´s Encrypt Zertifikat installieren
+LetÂ´s Encrypt Zertifikat installieren
 und mit Certbot automatisch aktualisieren
 
 $ sudo apt install certbot python3-certbot-apache
 
-Installation mit Y bestätigen,
+Installation mit Y bestÃ¤tigen,
 
-Servername/Alias überprüfen
+Servername/Alias Ã¼berprÃ¼fen
 
 $ sudo nano /etc/apache2/sites-available/Domain.de.conf
 
@@ -322,17 +322,17 @@ $ sudo systemctl reload apache2
 
 Zertifikat anfordern
 
-$ sudo certbot –apache
-–> Email Adresse eingeben „Enter“
-–> Nutzungsbedingungen bestätigen „A“+“Enter“
-–> Newsletter/Neuigkeiten „N“+“Enter“
-–> Domain auswählen
-–> Nach einem Moment auswählen ob alle Anfragen auf https umgeleitet werden sollen.
-1 = Nein 2=Ja mit „Enter bestätigen
+$ sudo certbot â€“apache
+â€“> Email Adresse eingeben â€žEnterâ€œ
+â€“> Nutzungsbedingungen bestÃ¤tigen â€žAâ€œ+â€œEnterâ€œ
+â€“> Newsletter/Neuigkeiten â€žNâ€œ+â€œEnterâ€œ
+â€“> Domain auswÃ¤hlen
+â€“> Nach einem Moment auswÃ¤hlen ob alle Anfragen auf https umgeleitet werden sollen.
+1 = Nein 2=Ja mit â€žEnter bestÃ¤tigen
 
-Erfolgsmeldung erschein (Congratulations! You have successfully enabled[…])
+Erfolgsmeldung erschein (Congratulations! You have successfully enabled[â€¦])
 
-Certbot status überprüfen
+Certbot status Ã¼berprÃ¼fen
 
 $ sudo systemctl status certbot.timer
 
@@ -341,13 +341,13 @@ Es sollte die Meldung
 Active: active (waiting)
 erscheinen.
 
-Let´s Encrypt Zertifikat wurde erstellt und wird mit Certbot automatisch aktualisiert.
+LetÂ´s Encrypt Zertifikat wurde erstellt und wird mit Certbot automatisch aktualisiert.
 
 Firewall Port freigaben und Firewall aktivieren:
 $ sudo ufw allow 1337
 $ sudo ufw allow 27017
 $ ufw allow OpenSSH
-$ sudo ufw allow ‚Apache Full‘
+$ sudo ufw allow â€šApache Fullâ€˜
 $ sudo ufw enable
 $ sudo ufw status (Status und freigegebene Ports einsehen)
 
@@ -359,7 +359,7 @@ Output
 Status: active
 
 To Action From
-— —— —-
+â€” â€”â€” â€”-
 27017 ALLOW Anywhere
 OpenSSH ALLOW Anywhere
 Apache Full ALLOW Anywhere
@@ -371,28 +371,28 @@ Apache Full (v6) ALLOW Anywhere (v6)
 
  
 
-Server neu starten (ein paar Minuten warten…)
+Server neu starten (ein paar Minuten wartenâ€¦)
 
-SSL für Nightscout aktivieren
+SSL fÃ¼r Nightscout aktivieren
 Via SSH einloggen und ins Nightscout Basisverzeichnis wechseln.
 
 $ cd /home/mainuser/cgm-remote-monitor
 $ nano start.sh
 
-bei #export SSL_KEY [..] das „#“ entfernen und deinen Pfad zum SSL Key eintragen
+bei #export SSL_KEY [..] das â€ž#â€œ entfernen und deinen Pfad zum SSL Key eintragen
 
 export SSL_KEY=/etc/letsencrypt/live/Domain.de/privkey.pem
 export SSL_CERT=/etc/letsencrypt/live/Domain.de/fullchain.pem
 
-Schließen und Speichern mit  „strg+X“ –>“Y“–>“enter“
+SchlieÃŸen und Speichern mit  â€žstrg+Xâ€œ â€“>â€œYâ€œâ€“>â€œenterâ€œ
 
 Nightscout Service neu starten
 
 $ sudo systemctl restart nightscout.service
 
-Nightscout status Prüfen:
+Nightscout status PrÃ¼fen:
 
 $ sudo systemctl status nightscout.service
 
-Nun kann Nightscout über deine domain.de:1337 (ssl verschlüsselt) aufgerufen werden.
+Nun kann Nightscout Ã¼ber deine domain.de:1337 (ssl verschlÃ¼sselt) aufgerufen werden.
 Es muss gegebenenfalls die Cache deines Browsers geleert werden wenn zuvor die Domain oder Nightscout aufgerufen wurde.

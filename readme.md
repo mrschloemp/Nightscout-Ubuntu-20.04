@@ -22,7 +22,7 @@ Putty öffnen, Serverdaten eingeben und via root User einloggen. Beim ersten Log
 Server Updates und diverse notwendige Plugins installieren
 Neuen Benutzer anlegen:
 
-  $ adduser mainuser
+$ adduser mainuser
 
 mainuser Root Berechtigung erteilen:
 
@@ -150,7 +150,7 @@ https://github.com/nightscout/cgm-remote-monitor#plugins  :
 
 #!/bin/bash
 
-# environment variables
+#environment variables
 export DISPLAY_UNITS=“mg/dl“
 export MONGO_CONNECTION=“mongodb://benutzer:passwort@localhost:27017/Nightscout“
 export BASE_URL=“127.0.0.1:1337"
@@ -187,7 +187,7 @@ export SHOW_FORECAST=“ar2 openaps“
 #export SSL_KEY=/etc/letsencrypt/live/domain.de/privkey.pem
 #export SSL_CERT=/etc/letsencrypt/live/domain.de/fullchain.pem
 
-# start server
+#start server
 /home/mainuser/.nvm/versions/node/v14.18.1/bin/node server.js
 
 Speichern und beenden mit: strg+X – Y – enter
@@ -245,33 +245,33 @@ Konfiguration abändern auf Deine Domain
 $ sudo nano /etc/apache2/sites-available/Domain.de.conf
 
 <VirtualHost *:80>
-# The ServerName directive sets the request scheme, hostname and port that
-# the server uses to identify itself. This is used when creating
-# redirection URLs. In the context of virtual hosts, the ServerName
-# specifies what hostname must appear in the request’s Host: header to
-# match this virtual host. For the default virtual host (this file) this
-# value is not decisive as it is used as a last resort host regardless.
-# However, you must set it for any further virtual host explicitly.
+#The ServerName directive sets the request scheme, hostname and port that
+#the server uses to identify itself. This is used when creating
+#redirection URLs. In the context of virtual hosts, the ServerName
+#specifies what hostname must appear in the request’s Host: header to
+#match this virtual host. For the default virtual host (this file) this
+#value is not decisive as it is used as a last resort host regardless.
+#However, you must set it for any further virtual host explicitly.
 
 ServerAdmin webmaster@domain.de
 ServerName Domain.de
 ServerAlias www.Domain.de
 DocumentRoot /var/www/html
 
-# Available loglevels: trace8, …, trace1, debug, info, notice, warn,
-# error, crit, alert, emerg.
-# It is also possible to configure the loglevel for particular
-# modules, e.g.
+#Available loglevels: trace8, …, trace1, debug, info, notice, warn,
+#error, crit, alert, emerg.
+#It is also possible to configure the loglevel for particular
+#modules, e.g.
 #LogLevel info ssl:warn
 
 ErrorLog ${APACHE_LOG_DIR}/Domain.de.error.log
 CustomLog ${APACHE_LOG_DIR}/Domain.de.access.log combined
 
-# For most configuration files from conf-available/, which are
-# enabled or disabled at a global level, it is possible to
-# include a line for only one particular virtual host. For example the
-# following line enables the CGI configuration for this host only
-# after it has been globally disabled with „a2disconf“.
+#For most configuration files from conf-available/, which are
+#enabled or disabled at a global level, it is possible to
+#include a line for only one particular virtual host. For example the
+#following line enables the CGI configuration for this host only
+#after it has been globally disabled with „a2disconf“.
 #Include conf-available/serve-cgi-bin.conf
 </VirtualHost>
 

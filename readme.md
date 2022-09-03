@@ -1,170 +1,201 @@
-Nightscout auf Ubuntu 20.04 installieren
+Nightscout on Ubuntu VPS server with Nginx
 
-Installation auf einem VPS R6 von 1blu.de. 
-Der VPS hat 2 CPU Cores, 6 GB Ram und 80GB SSD u.v.m…, ausreichend für Nightsout.
-https://www.1blu.de/vps-aktion/
+Full Instruction on: https://www.michael-schloemp.de/2022/08/28/nightscout-on-ubuntu-vps-server-with-nginx-translated/
 
-Eine zusätzliche Domain ist nicht zwangsläufig notwendig, kann man aber günstig dazu buchen. Eine Subdomain von 1blu ist beim Server enthalten. Let´s Encrypt funktioniert mit der Subdomain ohne Probleme (Die IP Adresse des Servers kann nicht mit Let´s Encrypt abgesichert werden!).
-Da ich schon ein Webhosting Paket bei 1blu besitze, habe ich daraus eine Domain auf den Server per DNS Eintrag geleitet.
+This guide was translated using Google Translate and may contain translation errors.
+I beg your pardon.
 
-Einrichtung des Servers.
-Ich setzte Grundkenntnisse Server/SSH/Konsole voraus.
+The Nightscout installation with Apache 2, as written in the original guide, has not proven to be as practical.
+In general, everything works with Apache 2, but only as long as you are on a wireless network without port blocking.
+If a port lock comes into play, you can no longer call up Nightscout.
+If you now set up port forwarding via Apache 2 (instructions here), this works, but not with AAPS.
+AAPS throws an XHR poll error when using port forwarding with Apache 2 and cannot connect to Nightscout.
+For this reason there is now a new guide here.
+Install Nightscout on a VPS running Ubuntu 20.04 and Nginx (pronounced Engin X).
+
+Adding to this guide: I am working with nginx for the first time. If there is an error in the instructions, I would be happy to receive constructive criticism.
 
 
-Ich habe mich für Ubuntu 20.04 als Distribution entschieden.
-Im Vorfeld habe ich Ubuntu 20.04 über das 1blu Kundeninterface installiert und mir die SSH Zugangsdaten notiert.
-Als Konsole/SSH Client verwende ich Putty https://www.putty.org/
 
-Beginnen wir mit dem Einrichten.
 
-Putty öffnen, Serverdaten eingeben und via root User einloggen. Beim ersten Login via SSH muss das Passwort geändert werden.
+After successful installation of the server we start with the preparations.
+Login with Putty of course required.
 
-Server Updates und diverse notwendige Plugins installieren
-Neuen Benutzer anlegen:
+Uninstall Apache2
 
-$ adduser mainuser
+First, Apache 2 is uninstalled, for this we stop the Apache service.
 
-mainuser Root Berechtigung erteilen:
+$ sudo service apache2 stop
 
-$ usermod -aG sudo mainuser
+Perform uninstallation:
 
-Berechtigung prüfen:
+$ sudo apt-get purge apache2 apache2-utils
 
-$ su mainuser
+also delete leftovers:
 
-$ grep ‚^sudo‘ /etc/group
+$ sudo rm -rf /etc/apache2
+$ sudo rm -rf /usr/sbin/apache2
+$ sudo rm -rf /usr/lib/apache2
+$ sudo rm -rf /etc/apache2
+$ sudo rm -rf /usr/share/apache2
+$ sudo rm -rf /usr/share/man/man8/apache2.8.gz
 
-Ubuntu aktualisieren:
+Find files and directories related to Apache
 
-$ sudo apt update
+$ whereis apache2
 
-Wenn Aktualisierungen vorliegen:
+If directories are still displayed, delete them as well.
 
-$ sudo apt ugrade
+Update Ubuntu
 
-Firewall UFW installieren:
+$ apt update
 
-$ sudo apt install ufw
+If updates are available, install them
 
-Um die Konfiguration der Firewall kümmern wir uns zum Schluss.
+$ apt upgrade
 
-Nano installieren
+Install important components
 
-$ sudo apt-get install nano
+Firewall (Firewall will be set up later):
 
-Git installieren:
+$ apt install etc
 
-$ sudo apt install git
+nginx:
 
-Phython sollte vorinstalliert sein, wenn nicht
+$ apt install nginx
 
-$ sudo apt install phyton
+Nano:
 
-Wenn Apache2 noch nicht aktiv/installiert
+$ apt-get install nano
 
-$ sudo apt install apache
+Git:
 
-Nodejs installieren
+$ apt install git
+
+Python:
+
+$ apt install python
+
+GCC, if not already present:
+
+$ apt install gcc
+
+Install MongoDB
+
+$ apt install mongodb
+
+After successful installation check the Mongo DB status:
+
+$ systemctl status mongodb
+
+MongoDB should be active, now let's check the connection:
+
+$mongo --eval 'db.runCommand({ connectionStatus: 1 })'
+
+Output:
+
+MongoDB shell version v3.6.8
+connecting to: mongodb://127.0.0.1:27017
+Implicit session: session { "id" : UUID("e3c1f2a1-a426-4366-b5f8-c8b8e7813135") }
+MongoDB server version: 3.6.8
+{
+"authInfo" : {
+"authenticatedUsers" : [ ],
+"authenticatedUserRoles" : [ ]
+},
+"okay" : 1
+}
+
+Create Mongo database
+
+(“change username” “password” as desired and remember/write it down)
+
+$ mongo
+> use Nightscout
+> db.createUser({user: "username", pwd: "password", roles:["readWrite"]})
+> quit()
+
+Create user
+
+Next, a new Ubuntu user is created (mainuser=username).
+
+Create new user:
+
+$adduser mainuser
+
+Grant root permission to mainuser:
+
+$usermod -aG sudo mainuser
+
+Check authorization:
+
+$su mainuser
+
+grep '^sudo' /etc/group
+
+Stay logged in as main user!
+
+Install nodejs
 
 $ sudo apt install nodejs
 $ sudo apt install build-essential checkinstall
 $ sudo apt install libssl-dev
 $ wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.33.8/install.sh | bash
 
-– restart konsole – login mit mainuser –
+– restart console – login with mainuser –
 
 $ source /etc/profile
-$ nvm ls-remote
-$ nvm install 14.18.1
-$ nvm list
-$ nvm use 14.18.1
+$nvm ls-remote
+$nvm install 14.18.1
+$nvm list
+$nvm use 14.18.1
 
-NPM installieren
+Install NPM
 
 $ sudo apt install npm
 
-GCC sollte installiert sein, wenn nicht
+Git clones
 
-$ sudo apt install gcc
+Check which directory you are in:
 
-Ab hier kann mit Root Benutzer weiter gearbeitet.
-
-Mongo DB installieren
-$ sudo apt install mongodb
-$ sudo systemctl status mongodb
-
-MongoDB sollte active sein, Verbindfung prüfen:
-
-$ mongo –eval ‚db.runCommand({ connectionStatus: 1 })‘
-
- 
-
-Ausgabe:
-
-MongoDB shell version v3.6.8
-connecting to: mongodb://127.0.0.1:27017
-Implicit session: session { „id“ : UUID(„e3c1f2a1-a426-4366-b5f8-c8b8e7813135“) }
-MongoDB server version: 3.6.8
-{
-„authInfo“ : {
-„authenticatedUsers“ : [ ],
-„authenticatedUserRoles“ : [ ]
-},
-„ok“ : 1
-}
-
- 
-
-Mongo Datenbank erstellen („benutzername“ „passwort“ nach Wunsch ändern und merken/aufschreiben)
-
-$ mongo
-> use Nightscout
-> db.createUser({user: „benutzername„, pwd: „passwort„, roles:[„readWrite“]})
-> quit()
-
- 
-
-Prüfen in welchem Verzeichnis man sich befindet:
-
-$ pwd
+$pwd
 > /home/mainuser
 
-Wenn nicht im home/mainuser verzeichnis
+If not in the home/mainuser directory
 
 § cd /home/mainuser
 
- 
-
-Git Kopieren/Clonen
+Git Copy/Clone
 
 $ git clone https://github.com/nightscout/cgm-remote-monitor.git
 $ cd cgm-remote-monitor
 $ npm install
 
-Nach der Installation
-$ nano start.sh
+After installation
 
-folgenden Text einfügen und speichern. „benutzer““passwort“ der MongoDatenbank ändern/angeben, API_Secret wunschgemäß Angeben, Base-Url ggf. ändern. Welche Plugins/Module benötigt werden hängt vom Anwender individuell ab.
-Die hier aufgeführten Plugins/Module sind für mich Optimal. Eine Auflistung der möglichen Plugins gibt´s auf github
-https://github.com/nightscout/cgm-remote-monitor#plugins  :
+$nano start.sh
+
+insert and save the following text. Change/specify "user" "password" of the Mongo database, specify API_Secret as desired, change base url if necessary. Which plugins/modules are required depends on the user individually.
+The plugins/modules listed here are optimal for me. There is a list of possible plugins on github
+https://github.com/nightscout/cgm-remote-monitor#plugins :
 
 #!/bin/bash
 
-#environment variables
-export DISPLAY_UNITS=“mg/dl“
-export MONGO_CONNECTION=“mongodb://benutzer:passwort@localhost:27017/Nightscout“
-export BASE_URL=“127.0.0.1:1337"
-export API_SECRET=“1234567890„
-export PUMP_FIELDS=“reservoir battery status“
+# environment variables
+export DISPLAY_UNITS="mg/dl"
+export MONGO_CONNECTION="mongodb://benutzer:passwort@localhost:27017/Nightscout"
+export BASE_URL="127.0.0.1:1337"
+export API_SECRET="12-stellige-API-Secret-Code"
+export PUMP_FIELDS="reservoir battery status"
 export DEVICESTATUS_ADVANCED=true
-export ENABLE=“careportal loop iob cob openaps pump bwg rawbg basal cors direction timeago devicestatus ar2 profile boluscalc food sage iage cage alexa basalprofile bgi directions bage upbat googlehome errorcodes reservoir battery openapsbasal“
+export ENABLE="careportal loop iob cob openaps pump bwg rawbg basal cors direction timeago devicestatus ar2 profile boluscalc food sage iage cage alexa basalprofile bgi directions bage upbat googlehome errorcodes reservoir battery openapsbasal"
 export TIME_FORMAT=24
 export INSECURE_USE_HTTP=true
 export LANGUAGE=de
 export EDIT_MODE=on
 export PUMP_ENABLE_ALERTS=true
-export PUMP_FIELDS=“reservoir battery clock status“
-export PUMP_RETRO_FIELDS=“reservoir battery clock“
+export PUMP_FIELDS="reservoir battery clock status"
+export PUMP_RETRO_FIELDS="reservoir battery clock"
 export PUMP_WARN_CLOCK=30
 export PUMP_URGENT_CLOCK=60
 export PUMP_WARN_RES=50
@@ -176,31 +207,32 @@ export PUMP_URGENT_BATT_V=1.30
 export OPENAPS_ENABLE_ALERTS=false
 export OPENAPS_WARN=30
 export OPENAPS_URGENT=60
-export OPENAPS_FIELDS=“status-symbol status-label iob meal-assist rssi freq“
-export OPENAPS_RETRO_FIELDS=“status-symbol status-label iob meal-assist rssi“
+export OPENAPS_FIELDS="status-symbol status-label iob meal-assist rssi freq"
+export OPENAPS_RETRO_FIELDS="status-symbol status-label iob meal-assist rssi"
 export LOOP_ENABLE_ALERTS=false
 export LOOP_WARN=30
 export LOOP_URGENT=60
 export SHOW_PLUGINS=careportal
-export SHOW_FORECAST=“ar2 openaps“
+export SHOW_FORECAST="ar2 openaps"
 
-#export SSL_KEY=/etc/letsencrypt/live/domain.de/privkey.pem
-#export SSL_CERT=/etc/letsencrypt/live/domain.de/fullchain.pem
-
-#start server
+# start server
 /home/mainuser/.nvm/versions/node/v14.18.1/bin/node server.js
 
-Speichern und beenden mit: strg+X – Y – enter
+Save and exit with: Ctrl+X - Y - enter
 
-$ chmod +100 +010 start.sh
+$ chmod 775 start.sh
 $ ./start.sh
 
-Nach Erfolgsmeldung strg+c
+After success message Ctrl+c
 
-Nightscout Service einrichten
+Set up nightscout service
+
+When setting up the Nightscout Service, there are different statements about the "Type". I use the type "simple" from the beginning.
+The "forked" type is recommended in various forums. The type "simple" should normally suffice. If Nightscout doesn't start, you can change the type to "forked" afterwards. After each change to the Nightscout Service or the start.sh file, the Nightscout Service must be restarted (sudo systemctl restart nightscout.service)
+
 $ sudo nano /etc/systemd/system/nightscout.service
 
-einfügen und speichern:
+insert and save:
 
 [Unit]
 Description=Nightscout Service
@@ -214,185 +246,170 @@ ExecStart=/home/mainuser/cgm-remote-monitor/start.sh
 [Install]
 WantedBy=multi-user.target
 
-Speichern und beenden mit: „strg+X“ – „Y“ – „enter“
+Save and exit with: "Ctrl+X" - "Y" - "enter"
 Reload systemd:
 
 $ sudo systemctl daemon-reload
 
-Nigtscout Service aktivieren und starten:
+Activate and start Nigtscout service:
 
 $ sudo systemctl enable nightscout.service
 $ sudo systemctl start nightscout.service
 
-Nightscout Service Status anzeigen lassen:
+Display Nightscout service status:
 
 $ sudo systemctl status nightscout.service
 
-Ausgabe:
+Output:
 
-? nightscout.service – Nightscout Service
+● nightscout.service – Nightscout Service
 Loaded: loaded (/etc/systemd/system/nightscout.service; enabled; vendor preset: enabled)
-Active: active (running)
+Active: active (running)
 [..]
 
-Konfiguration VirtualHost
-Standard Konfiguration kopieren (Standard zu deiner Domain). Rot Markierte Elemente auf deine Domain/Bedürnisse ändern.
+Assign domain to host
 
-$ sudo cp /etc/apache2/sites-available/000-default.conf /etc/apache2/sites-available/Domain.de.conf
-
-Konfiguration abändern auf Deine Domain
-
-$ sudo nano /etc/apache2/sites-available/Domain.de.conf
-
-<VirtualHost *:80>
-#The ServerName directive sets the request scheme, hostname and port that
-#the server uses to identify itself. This is used when creating
-#redirection URLs. In the context of virtual hosts, the ServerName
-#specifies what hostname must appear in the request’s Host: header to
-#match this virtual host. For the default virtual host (this file) this
-#value is not decisive as it is used as a last resort host regardless.
-#However, you must set it for any further virtual host explicitly.
-
-ServerAdmin webmaster@domain.de
-ServerName Domain.de
-ServerAlias www.Domain.de
-DocumentRoot /var/www/html
-
-#Available loglevels: trace8, …, trace1, debug, info, notice, warn,
-#error, crit, alert, emerg.
-#It is also possible to configure the loglevel for particular
-#modules, e.g.
-#LogLevel info ssl:warn
-
-ErrorLog ${APACHE_LOG_DIR}/Domain.de.error.log
-CustomLog ${APACHE_LOG_DIR}/Domain.de.access.log combined
-
-#For most configuration files from conf-available/, which are
-#enabled or disabled at a global level, it is possible to
-#include a line for only one particular virtual host. For example the
-#following line enables the CGI configuration for this host only
-#after it has been globally disabled with „a2disconf“.
-#Include conf-available/serve-cgi-bin.conf
-</VirtualHost>
-
-Spichern mit „strg+x“ –> „Y“–>“enter“
-
-Standard Konfiguration deaktivieren
-
-$ sudo a2dissite 000-default.conf
-
-Deine Konfiguration aktivieren
-
-$ sudo a2ensite Domain.de.conf
-
-Apache neustart
-
-$ sudo systemctl restart apache2
-
-Domain dem Host zuweisen
+(Main domain and a subdomain for ns).
+So that Nightscout is not immediately found by strangers via the main domain, I use a subdomain.
 
 $ sudo nano /etc/hosts
 
-[…]
-IP.deines.Servers Domain.de
-[…]
+[...]
+IP.of.your.server.Domain.de
 
-Speichern mit „strg+X“ – „Y“ – „enter“
+IP.of.your.server.sub.domain.de
 
-Let´s Encrypt Zertifikat installieren
-und mit Certbot automatisch aktualisieren
+[...]
 
-$ sudo apt install certbot python3-certbot-apache
+Save with "ctrl+X" - "Y" - "enter"
 
-Installation mit Y bestätigen,
+Create a configuration for main domain and subdomain
 
-Servername/Alias überprüfen
+For the main domain we configure the default nginx config. Here we enter the server_name.
 
-$ sudo nano /etc/apache2/sites-available/Domain.de.conf
+$ sudo nano /etc/nginx/sites-available/default
 
-Wenn ServerName und ServerAlias fehlt, nachtragen.
+server_name domain.de;
+server_name www.domain.de;
 
-Konfiguration testen
+Next, set up the subdomain (unencrypted port forwarding)
 
-$ sudo apache2ctl configtest
+$ sudo nano /etc/nginx/sites-available/Sub.domain.de.conf
 
-Wenn Syntax OK, Apache neu starten
+Copy this text, change server_name to your subdomain before:
 
-$ sudo systemctl reload apache2
+server {
+listen 80;
 
-Zertifikat anfordern
+server_name Sub.domain.de;
+server_name www.sub.doamin.de;
 
-$ sudo certbot –apache
-–> Email Adresse eingeben „Enter“
-–> Nutzungsbedingungen bestätigen „A“+“Enter“
-–> Newsletter/Neuigkeiten „N“+“Enter“
-–> Domain auswählen
-–> Nach einem Moment auswählen ob alle Anfragen auf https umgeleitet werden sollen.
-1 = Nein 2=Ja mit „Enter bestätigen
+location / {
+proxy_pass http://127.0.0.1:1337;
+proxy_set_header Upgrade $http_upgrade;
+proxy_set_header Connection "upgrade";
+proxy_set_header X-Forwarded-Proto "https";
+}
+}
 
-Erfolgsmeldung erschein (Congratulations! You have successfully enabled[…])
+Next, enable the Nginx configuration for the subdoamin:
 
-Certbot status überprüfen
+$ sudo ln -s /etc/nginx/sites-available/Sub.doamin.de.conf /etc/nginx/sites-enabled/
+
+Restart Nginx for the configuration to take effect.
+
+$ sudo service nginx restart
+
+Install Certbot for Nginx
+
+If not already installed, install certbot/python3:
+
+$ sudo apt install certbot python3-certbot-nginx
+
+Request certificate:
+
+Certificate for the main domain:
+
+$ sudo certbot --nginx -d domain.de -d www.doamin.de
+
+The terms of use must be accepted when the certificate is created for the first time.
+Your email address will also be requested, this must be entered.
+Advertising from partners can be answered with no.
+
+Confirm redirect with 2! This means that every call to your site is automatically routed to SSL encryption.
+
+–> Enter email address “Enter”
+–> Confirm terms of use “A”+”Enter”
+-> Newsletter/News "N"+"Enter"
+-> After a moment select whether all requests should be redirected to https.
+1 = No 2 = Yes confirm with "Enter".
+
+Then request a certificate for the subdomain:
+
+$ sudo certbot --nginx -d Sub.domain.de -d www.Sub.domain.de
+
+Confirm redirect with 2.
+
+Check Certbot timer:
 
 $ sudo systemctl status certbot.timer
 
-Es sollte die Meldung
+Test renewal process
 
-Active: active (waiting)
-erscheinen.
+$ sudo certbot renew --dry-run
 
-Let´s Encrypt Zertifikat wurde erstellt und wird mit Certbot automatisch aktualisiert.
+Renew certificate or redirect
 
-Firewall Port freigaben und Firewall aktivieren:
-$ sudo ufw allow 1337
-$ sudo ufw allow 27017
-$ ufw allow OpenSSH
-$ sudo ufw allow ‚Apache Full‘
-$ sudo ufw enable
-$ sudo ufw status (Status und freigegebene Ports einsehen)
+I can not understand this step, but creates what is desired. Request or repair the certificate again for the subdomain. I had to do this step with every test installation so that the subdomain was properly encrypted and forwarded to the Nightscout port.
 
-Kontrolle ob alles korrekt freigegeben wurde
+To do this, simply enter the certificate request command again:
 
-$ sudo ufw status
+$ sudo certbot --nginx -d Sub.domain.de -d www.Sub.domain.de
 
-Output
-Status: active
+It is reported that a certificate already exists. Here with "1" restore the certificate.
+
+1: Attempt to reinstall this existing certificate
+
+Now the encrypted port forwarding should work properly.
+
+Configure/enable firewall
+
+To configure the firewall, log in with the root account!
+Release port 27017 (allows external access to Mongo DB e.g. with Robot3T)
+Allow Nginx and OpenSSH.
+Release port 1337 (Opinions differ here as to whether it makes sense or not.)
+
+$ufw allow 1337
+$ufw allow 'Nginx Full'
+$ufw allow 27017
+$ufw allow OpenSSH
+
+Next, we enable the firewall:
+
+$ ufw enable
+
+To see whether the firewall is activated and the above settings are allowed, check the status:
+
+$ ufw status
+
+The result should look like this:
+
+State: active
 
 To Action From
-— —— —-
+------ ----
+1337 ALLOW Anywhere
 27017 ALLOW Anywhere
 OpenSSH ALLOW Anywhere
 Apache Full ALLOW Anywhere
-1337 ALLOW Anywhere
+Nginx Full ALLOW Anywhere
+1337 (v6) ALLOW Anywhere (v6)
 27017 (v6) ALLOW Anywhere (v6)
 OpenSSH (v6) ALLOW Anywhere (v6)
 Apache Full (v6) ALLOW Anywhere (v6)
-1337 (v6) ALLOW Anywhere (v6)
+Nginx Full (v6) ALLOW Anywhere (v6)
 
- 
+Now the nginx test page should appear when you call up the main domain (automatically encrypted) and the Nightscout installation should appear when you call up the subdomain (without specifying port 1337, since a forwarding has already been set up above)
 
-Server neu starten (ein paar Minuten warten…)
-
-SSL für Nightscout aktivieren
-Via SSH einloggen und ins Nightscout Basisverzeichnis wechseln.
-
-$ cd /home/mainuser/cgm-remote-monitor
-$ nano start.sh
-
-bei #export SSL_KEY [..] das „#“ entfernen und deinen Pfad zum SSL Key eintragen
-
-export SSL_KEY=/etc/letsencrypt/live/Domain.de/privkey.pem
-export SSL_CERT=/etc/letsencrypt/live/Domain.de/fullchain.pem
-
-Schließen und Speichern mit  „strg+X“ –>“Y“–>“enter“
-
-Nightscout Service neu starten
-
-$ sudo systemctl restart nightscout.service
-
-Nightscout status Prüfen:
-
-$ sudo systemctl status nightscout.service
-
-Nun kann Nightscout über deine domain.de:1337 (ssl verschlüsselt) aufgerufen werden.
-Es muss gegebenenfalls die Cache deines Browsers geleert werden wenn zuvor die Domain oder Nightscout aufgerufen wurde.
+Optionally, you can restart the server once,
+The boot process until Nightscout is fully accessible again can take up to 5 minutes.
